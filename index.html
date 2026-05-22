@@ -29,7 +29,7 @@ fetch("/links.json", { cache: "no-cache" }).then(r => r.json()).then(links => {
     for (const [k, v] of rows) {
       const urls = Array.isArray(v) ? v : [v];
       const hay = (k + " " + urls.join(" ")).toLowerCase();
-      if (f && !hay.includes(f)) continue;
+      if (!hay.includes(f)) continue;
       const tr = t.insertRow();
       tr.insertCell().innerHTML = `<a href="/${encodeURIComponent(k)}">${k}</a>`;
       const right = urls.map(u => `<a href="${u}">${u}</a>`).join("<br>");

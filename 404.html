@@ -14,19 +14,14 @@
 (async () => {
   const path = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, ""));
   const msg = document.getElementById("msg");
-  if (!path) { location.replace("/"); return; }
-  let links;
-  try {
-    links = await (await fetch("/links.json", { cache: "no-cache" })).json();
-  } catch (e) {
-    msg.textContent = "failed to load links.json";
-    return;
-  }
-  const parts = path.split("/");
-  let slug = path, dest;
-  while (parts.length && !(dest = links[slug])) {
-    parts.pop();
-    slug = parts.join("/");
+  const links = await (await fetch("/links.json", { cache: "no-cache" })).json();
+  const segs = path.split("/");
+  let slug, dest;
+  while (segs.length) {
+    slug = segs.join("/");
+    dest = links[slug];
+    if (dest) break;
+    segs.pop();
   }
   if (typeof dest === "string") {
     location.replace(dest);
