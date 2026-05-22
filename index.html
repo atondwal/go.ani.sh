@@ -1,0 +1,45 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>go.ani.sh</title>
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; max-width: 720px; margin: 2em auto; padding: 0 1em; color: #222; }
+  h1 { font-size: 1.4em; margin: 0 0 .25em; }
+  .hint { color: #888; margin: 0 0 1em; }
+  input { width: 100%; padding: .5em .6em; font: inherit; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+  td { padding: .35em .5em; border-bottom: 1px solid #eee; vertical-align: top; }
+  td:first-child { font-family: ui-monospace, monospace; white-space: nowrap; width: 1%; }
+  td:last-child { color: #555; word-break: break-all; }
+  a { color: #06c; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+<body>
+<h1>go.ani.sh</h1>
+<p class="hint">Type <code>go/<i>name</i></code> in the address bar — <a href="https://github.com/atondwal/go.ani.sh/edit/main/links.json">edit links.json</a>.</p>
+<input id="q" placeholder="filter…" autofocus>
+<table><tbody id="t"></tbody></table>
+<script>
+fetch("/links.json", { cache: "no-cache" }).then(r => r.json()).then(links => {
+  const rows = Object.entries(links).sort(([a], [b]) => a.localeCompare(b));
+  const t = document.getElementById("t");
+  const q = document.getElementById("q");
+  const render = () => {
+    const f = q.value.toLowerCase();
+    t.replaceChildren();
+    for (const [k, v] of rows) {
+      const urls = Array.isArray(v) ? v : [v];
+      const hay = (k + " " + urls.join(" ")).toLowerCase();
+      if (f && !hay.includes(f)) continue;
+      const tr = t.insertRow();
+      tr.insertCell().innerHTML = `<a href="/${encodeURIComponent(k)}">${k}</a>`;
+      const right = urls.map(u => `<a href="${u}">${u}</a>`).join("<br>");
+      tr.insertCell().innerHTML = urls.length > 1
+        ? `<small>${urls.length} links</small><br>${right}`
+        : right;
+    }
+  };
+  q.oninput = render;
+  render();
+});
+</script>
+</body>

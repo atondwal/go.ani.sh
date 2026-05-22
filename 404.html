@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>go.ani.sh</title>
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; max-width: 480px; margin: 4em auto; padding: 0 1em; }
+  code { background: #f3f3f3; padding: 1px 4px; border-radius: 3px; }
+  a { color: #06c; }
+  button { font: inherit; padding: .4em .8em; cursor: pointer; }
+  ul { padding-left: 1.2em; }
+</style>
+<body>
+<div id="msg">redirecting…</div>
+<script>
+(async () => {
+  const path = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, ""));
+  const msg = document.getElementById("msg");
+  if (!path) { location.replace("/"); return; }
+  let links;
+  try {
+    links = await (await fetch("/links.json", { cache: "no-cache" })).json();
+  } catch (e) {
+    msg.textContent = "failed to load links.json";
+    return;
+  }
+  const parts = path.split("/");
+  let slug = path, dest;
+  while (parts.length && !(dest = links[slug])) {
+    parts.pop();
+    slug = parts.join("/");
+  }
+  if (typeof dest === "string") {
+    location.replace(dest);
+  } else if (Array.isArray(dest) && dest.length) {
+    const items = dest.map(u => `<li><a href="${u}" target="_blank" rel="noopener">${u}</a></li>`).join("");
+    msg.innerHTML = `<p><code>${slug}</code> &rarr; ${dest.length} links:</p>
+      <ul>${items}</ul>
+      <button id="open" autofocus>Open all</button>`;
+    document.getElementById("open").onclick = () => {
+      for (const u of dest.slice(1)) window.open(u, "_blank", "noopener");
+      location.replace(dest[0]);
+    };
+  } else {
+    msg.innerHTML = `no link <code>${slug}</code> — see <a href="/">index</a>`;
+  }
+})();
+</script>
+</body>
